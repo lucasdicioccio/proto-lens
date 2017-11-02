@@ -90,7 +90,7 @@ moduleName modulePrefix fd
 
 -- | Get the Haskell module name corresponding to a given .proto file.
 moduleNameStr :: String -> FilePath -> String
-moduleNameStr prefix path = fixModuleName rawModuleName
+moduleNameStr prefix path = fixModuleName basicModuleName
   where
     fixModuleName "" = ""
     -- Characters allowed in Bazel filenames but not in module names:
@@ -98,8 +98,12 @@ moduleNameStr prefix path = fixModuleName rawModuleName
     fixModuleName ('_':c:cs) = toUpper c : fixModuleName cs
     fixModuleName ('-':c:cs) = toUpper c : fixModuleName cs
     fixModuleName (c:cs) = c : fixModuleName cs
-    rawModuleName = intercalate "."
+    -- Sometimes the FilePath contains some hidden dir like '.dirname':
+    renameLeadingDots ('.':str) = "Dot_" ++ renameLeadingDots str
+    renameLeadingDots str = str
+    basicModuleName = intercalate "."
                         . (prefix :)
+                        . fmap renameLeadingDots
                         . splitDirectories $ dropExtension
                         $ path
 

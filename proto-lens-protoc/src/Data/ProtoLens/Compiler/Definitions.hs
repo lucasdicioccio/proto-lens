@@ -363,7 +363,7 @@ enumDef :: Text -> String -> EnumDescriptorProto
           -> (Text, Definition Name)
 enumDef protoPrefix hsPrefix d = let
     mkText n = protoPrefix <> n
-    mkHsName n = fromString $ hsPrefix ++ unpack n
+    mkHsName n = fromString $ hsPrefix ++ unpack (T.toUpper n)
     in (mkText (d ^. name)
        , Enum EnumInfo
             { enumName = mkHsName (d ^. name)
